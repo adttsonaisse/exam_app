@@ -54,29 +54,46 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: AppTheme.surfaceColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            side: const BorderSide(color: AppTheme.borderColor),
           ),
           title: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppTheme.dangerColor),
-              SizedBox(width: 8),
-              Text('QR Code Tidak Valid', style: TextStyle(fontSize: 18)),
+              Icon(Icons.warning_amber_rounded, color: AppTheme.badgeWarning),
+              SizedBox(width: 10),
+              Text(
+                'QR Code Tidak Valid',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.foregroundColor,
+                ),
+              ),
             ],
           ),
           content: Text(
             'QR code yang dipindai bukan tautan resmi Google Forms ujian.\n\nIsi QR: $rawValue',
-            style: const TextStyle(fontSize: 14, color: AppTheme.secondaryText),
+            style: const TextStyle(fontSize: 14, height: 1.4, color: AppTheme.secondaryText),
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
                 setState(() {
                   _isProcessing = false;
                 });
               },
-              child: const Text('Scan Ulang', style: TextStyle(color: AppTheme.primaryColor)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: AppTheme.onPrimary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                ),
+              ),
+              child: const Text('Scan Ulang'),
             ),
           ],
         );
@@ -87,11 +104,15 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.deepSurface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text('Pindai QR Code Ujian'),
+        backgroundColor: AppTheme.deepSurface,
+        foregroundColor: AppTheme.onDark,
+        elevation: 0,
+        title: const Text(
+          'Pindai QR Code Ujian',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, letterSpacing: -0.3),
+        ),
         actions: [
           IconButton(
             icon: ValueListenableBuilder<MobileScannerState>(
@@ -99,11 +120,11 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
               builder: (context, state, child) {
                 switch (state.torchState) {
                   case TorchState.on:
-                    return const Icon(Icons.flash_on, color: Colors.amber);
+                    return const Icon(Icons.flash_on, color: AppTheme.heroGlow);
                   case TorchState.off:
                   case TorchState.unavailable:
                   case TorchState.auto:
-                    return const Icon(Icons.flash_off, color: Colors.white);
+                    return const Icon(Icons.flash_off, color: AppTheme.onDark);
                 }
               },
             ),
@@ -117,31 +138,45 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             controller: _scannerController,
             onDetect: _onDetect,
           ),
-          // Scanner Overlay Frame
+          // Superhuman Target Frame (Lavender glow accent, 16px radius)
           Center(
             child: Container(
-              width: 250,
-              height: 250,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.primaryColor, width: 2.5),
-                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.primaryColor, width: 2),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33CBB7FB),
+                    blurRadius: 20,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
             ),
           ),
-          // Guidance text
-          const Positioned(
-            bottom: 60,
-            left: 20,
-            right: 20,
-            child: Text(
-              'Arahkan kamera ke QR Code soal ujian Google Form yang diberikan pengawas',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                shadows: [
-                  Shadow(blurRadius: 4, color: Colors.black87),
-                ],
+          // Guidance banner (dark surface chip, warm on-dark text)
+          Positioned(
+            bottom: 48,
+            left: 24,
+            right: 24,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.darkSurface.withValues(alpha: 0.90),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                border: Border.all(color: AppTheme.hairlineDark),
+              ),
+              child: const Text(
+                'Arahkan kamera ke QR Code soal ujian Google Form yang diberikan pengawas',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppTheme.onDark,
+                  fontSize: 13,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),

@@ -16,7 +16,7 @@ class AlarmOverlayDialog extends StatefulWidget {
 }
 
 class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
-    with SingleTickerProviderStateMixin {
+  with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   final TextEditingController _pinController = TextEditingController();
   String? _errorMessage;
@@ -26,7 +26,7 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 700),
     )..repeat(reverse: true);
   }
 
@@ -71,9 +71,13 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
-        final alpha = 0.85 + (_pulseController.value * 0.12);
+        final alpha = 0.88 + (_pulseController.value * 0.08);
         return Container(
-          color: Colors.red.shade900.withValues(alpha: alpha),
+          color: Color.lerp(
+            const Color(0xEB1B1938), // Twilight purple base
+            AppTheme.dangerColor.withValues(alpha: 0.95),
+            _pulseController.value * 0.45,
+          )!.withValues(alpha: alpha),
           child: child,
         );
       },
@@ -85,13 +89,14 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
             child: Container(
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                color: AppTheme.card,
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                border: Border.all(color: AppTheme.borderColor),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black45,
-                    blurRadius: 20,
-                    offset: Offset(0, 8),
+                    color: Color(0x2E000000),
+                    blurRadius: 28,
+                    offset: Offset(0, 10),
                   ),
                 ],
               ),
@@ -99,28 +104,31 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.warning_rounded,
-                      size: 38,
-                      color: Colors.red,
+                  Center(
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: AppTheme.bone,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        border: Border.all(color: AppTheme.dangerColor.withValues(alpha: 0.3)),
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 32,
+                        color: AppTheme.dangerColor,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   const Text(
                     'PERINGATAN PELANGGARAN!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.red,
-                      letterSpacing: 0.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.dangerColor,
+                      letterSpacing: 0.6,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -131,19 +139,20 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.foregroundColor,
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   const Text(
                     'Alarm suara aktif. Harap letakkan perangkat Anda di atas meja dan panggil pengawas ujian untuk mematikan alarm.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      height: 1.4,
+                      height: 1.45,
                       color: AppTheme.secondaryText,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: _pinController,
                     keyboardType: TextInputType.number,
@@ -153,19 +162,24 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
                       labelText: 'Masukkan PIN Pengawas',
                       hintText: '6 digit PIN',
                       errorText: _errorMessage,
-                      prefixIcon: const Icon(Icons.lock_rounded, size: 20),
+                      prefixIcon: const Icon(Icons.lock_rounded, size: 20, color: AppTheme.mute),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _handleReset,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
+                      backgroundColor: AppTheme.dangerColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      ),
                     ),
                     child: const Text(
                       'Matikan Alarm & Lanjutkan Ujian',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],

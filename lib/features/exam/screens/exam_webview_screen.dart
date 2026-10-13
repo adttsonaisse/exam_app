@@ -133,16 +133,32 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              backgroundColor: AppTheme.surfaceColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                side: const BorderSide(color: AppTheme.borderColor),
               ),
-              title: const Text('Otorisasi Selesai Ujian'),
+              title: const Row(
+                children: [
+                  Icon(Icons.lock_outline_rounded, color: AppTheme.secondaryColor),
+                  SizedBox(width: 10),
+                  Text(
+                    'Otorisasi Selesai Ujian',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.foregroundColor,
+                    ),
+                  ),
+                ],
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Untuk mengakhiri sesi ujian dan membuka kunci aplikasi, pengawas wajib memasukkan PIN Pengawas.',
-                    style: TextStyle(fontSize: 13, color: AppTheme.secondaryText),
+                    style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.secondaryText),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -160,6 +176,9 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.secondaryText,
+                  ),
                   child: const Text('Batal'),
                 ),
                 ElevatedButton(
@@ -176,6 +195,14 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
                       });
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: AppTheme.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                  ),
                   child: const Text('Konfirmasi Selesai'),
                 ),
               ],
@@ -207,43 +234,71 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
     return PopScope(
       canPop: false, // Disable hardware back button
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundColor,
         body: SafeArea(
           child: Stack(
             children: [
               // Main WebView
               Column(
                 children: [
-                  // Minimal Top Status Bar
+                  // Superhuman Minimalist Top Status Bar
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: const BoxDecoration(
                       color: AppTheme.surfaceColor,
                       border: Border(bottom: BorderSide(color: AppTheme.borderColor)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.shield_rounded, size: 18, color: AppTheme.primaryColor),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.bone,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                          ),
+                          child: const Icon(
+                            Icons.shield_rounded,
+                            size: 16,
+                            color: AppTheme.secondaryColor,
+                          ),
+                        ),
                         const SizedBox(width: 8),
                         const Text(
                           'Sesi Ujian Terkunci',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            letterSpacing: -0.2,
                             color: AppTheme.foregroundColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Real state live dot indicator (affirmative state without glowing pulse)
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.badgeSuccess,
+                            shape: BoxShape.circle,
                           ),
                         ),
                         const Spacer(),
                         OutlinedButton(
                           onPressed: _handleExitExam,
                           style: OutlinedButton.styleFrom(
+                            backgroundColor: AppTheme.canvas,
+                            foregroundColor: AppTheme.foregroundColor,
+                            side: const BorderSide(color: AppTheme.hairline),
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                            ),
                           ),
                           child: const Text(
                             'Selesai Ujian',
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
@@ -251,8 +306,8 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
                   ),
                   if (_isLoading)
                     const LinearProgressIndicator(
-                      color: AppTheme.primaryColor,
-                      backgroundColor: Colors.transparent,
+                      color: AppTheme.secondaryColor,
+                      backgroundColor: AppTheme.bone,
                       minHeight: 2,
                     ),
                   Expanded(

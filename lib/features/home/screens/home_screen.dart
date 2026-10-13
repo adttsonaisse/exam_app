@@ -45,14 +45,23 @@ class HomeScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              backgroundColor: AppTheme.surfaceColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                side: const BorderSide(color: AppTheme.borderColor),
               ),
               title: const Row(
                 children: [
-                  Icon(Icons.admin_panel_settings_rounded, color: AppTheme.primaryColor),
-                  SizedBox(width: 8),
-                  Text('PIN Pengawas Ujian', style: TextStyle(fontSize: 18)),
+                  Icon(Icons.admin_panel_settings_rounded, color: AppTheme.secondaryColor),
+                  SizedBox(width: 10),
+                  Text(
+                    'PIN Pengawas Ujian',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.foregroundColor,
+                    ),
+                  ),
                 ],
               ),
               content: Column(
@@ -61,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'PIN ini digunakan pengawas untuk mematikan alarm pelanggaran dan membuka kunci sesi ujian.',
-                    style: TextStyle(fontSize: 13, color: AppTheme.secondaryText),
+                    style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.secondaryText),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -78,6 +87,9 @@ class HomeScreen extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.secondaryColor,
+                  ),
                   child: const Text('Batal'),
                 ),
                 ElevatedButton(
@@ -95,6 +107,14 @@ class HomeScreen extends StatelessWidget {
                       });
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: AppTheme.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                  ),
                   child: const Text('Simpan PIN'),
                 ),
               ],
@@ -114,46 +134,91 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'Pengaturan PIN Pengawas',
-            icon: const Icon(Icons.admin_panel_settings_outlined),
+            icon: const Icon(Icons.admin_panel_settings_outlined, color: AppTheme.secondaryColor),
             onPressed: () => _showPinConfigDialog(context),
           ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
-              // App Title & Headline
-              const Text(
-                'Ujian Aman (Exam Shield)',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.625,
-                  color: AppTheme.foregroundColor,
+              // Superhuman Signature Hero Section
+              Container(
+                padding: const EdgeInsets.all(22.0),
+                decoration: BoxDecoration(
+                  gradient: AppTheme.heroGradient,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shield_outlined, size: 14, color: AppTheme.onDark),
+                          SizedBox(width: 6),
+                          Text(
+                            'KIOSK SECURITY ACTIVE',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.onDark,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Ujian Aman (Exam Shield)',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        height: 1.15,
+                        color: AppTheme.onDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Aplikasi pelaksanaan ujian terkunci anti-contek dengan perlindungan layar penuh dan sensor keamanan.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.5,
+                        color: AppTheme.onDarkMute,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Aplikasi pelaksanaan ujian terkunci anti-contek dengan perlindungan layar penuh dan sensor keamanan.',
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                  color: AppTheme.secondaryText,
-                ),
-              ),
-              const SizedBox(height: 32),
 
-              // Readiness Checklist Section
+              const SizedBox(height: 24),
+
+              // Readiness Checklist Section Header
               const Text(
                 'Pemeriksaan Kesiapan Perangkat',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.foregroundColor,
+                  letterSpacing: -0.2,
                 ),
               ),
               const SizedBox(height: 12),
@@ -180,7 +245,7 @@ class HomeScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // Primary CTA Button
+              // Primary CTA Button (Lavender Glow with Ink text, 8px radius)
               ElevatedButton.icon(
                 onPressed: () => _handleScan(context),
                 icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
@@ -190,13 +255,15 @@ class HomeScreen extends StatelessWidget {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: AppTheme.onPrimary,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -222,8 +289,8 @@ class HomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              color: AppTheme.bone,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),
             child: Icon(icon, size: 20, color: AppTheme.foregroundColor),
           ),
@@ -254,7 +321,7 @@ class HomeScreen extends StatelessWidget {
           Icon(
             isReady ? Icons.check_circle_rounded : Icons.error_outline_rounded,
             size: 20,
-            color: isReady ? AppTheme.successColor : AppTheme.dangerColor,
+            color: isReady ? AppTheme.badgeSuccess : AppTheme.dangerColor,
           ),
         ],
       ),

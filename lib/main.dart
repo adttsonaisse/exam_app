@@ -62,6 +62,7 @@ class _ExamAppState extends State<ExamApp> {
       title: 'Exam Shield',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: _buildCurrentScreen(),
     );
   }
