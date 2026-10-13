@@ -68,7 +68,7 @@ void main() {
     );
   });
 
-  testWidgets('Unpin fallback poll triggers alarm when lock task is inactive',
+  testWidgets('Unpin alarm resolved by PIN shows re-pin barrier without alarm loop',
       (tester) async {
     final mockKiosk = MockKioskService()..isPinned = false;
     addTearDown(mockKiosk.dispose);
@@ -84,9 +84,42 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.byType(AlarmOverlayDialog), findsOneWidget);
-    expect(
-      find.text(AlarmOverlayDialog.violationMessage),
-      findsOneWidget,
-    );
+
+    // Supervisor enters the correct PIN to silence the alarm.
+    // (Bounded pumps: the exam loading bar animates forever, so no settle.)
+    await tester.enterText(find.byType(TextField), '123456');
+    await tester.tap(find.widgetWithText(
+        ElevatedButton, 'Matikan Alarm & Lanjutkan Ujian'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Re-pin barrier appears with Next disabled; alarm must not return.
+    expect(find.text('Lanjut ke Ujian'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byType(AlarmOverlayDialog), findsNothing);
+
+    final nextButton = find.widgetWithText(ElevatedButton, 'Lanjut ke Ujian');
+    expect(tester.widget<ElevatedButton>(nextButton).onPressed, isNull);
+
+    // Re-pin the app: Next enables, tapping it resumes the exam.
+    mockKiosk.isPinned = true;
+    final retryButton =
+        find.widgetWithText(ElevatedButton, 'Sematkan Aplikasi Sekarang');
+    await tester.ensureVisible(retryButton);
+    await tester.tap(retryButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.widget<ElevatedButton>(nextButton).onPressed, isNotNull);
+    await tester.ensureVisible(nextButton);
+    await tester.tap(nextButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Lanjut ke Ujian'), findsNothing);
+    expect(find.byType(AlarmOverlayDialog), findsNothing);
+    expect(find.text('Sesi Ujian Terkunci'), findsOneWidget);
   });
 }

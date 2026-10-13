@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/core/theme/app_theme.dart';
 import 'package:exam/features/alarm/controllers/alarm_controller.dart';
 
 class AlarmOverlayDialog extends StatefulWidget {
   final AlarmController alarmController;
+
+  /// Called with the resolved attempt after a correct supervisor PIN.
+  final void Function(ExitAttempt attempt)? onResolved;
 
   static const String violationMessage =
       'Terdeteksi upaya keluar dari mode ujian! Letakkan perangkat di atas meja dan panggil pengawas.';
@@ -11,6 +15,7 @@ class AlarmOverlayDialog extends StatefulWidget {
   const AlarmOverlayDialog({
     super.key,
     required this.alarmController,
+    this.onResolved,
   });
 
   @override
@@ -51,12 +56,15 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
   }
 
   void _handleReset() {
+    final attempt = widget.alarmController.currentAttempt;
     final inputPin = _pinController.text.trim();
     final success = widget.alarmController.resolveAlarm(inputPin);
     if (!success) {
       setState(() {
         _errorMessage = 'PIN Pengawas salah. Hubungi pengawas ruangan.';
       });
+    } else if (attempt != null) {
+      widget.onResolved?.call(attempt);
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:exam/core/validators/exam_url_validator.dart';
 import 'package:exam/core/validators/supervisor_pin_validator.dart';
 import 'package:exam/features/alarm/controllers/alarm_controller.dart';
 import 'package:exam/features/alarm/widgets/alarm_overlay_dialog.dart';
+import 'package:exam/features/pinning/screens/pinning_gatekeeper_screen.dart';
 
 class ExamWebViewScreen extends StatefulWidget {
   final String examUrl;
@@ -37,6 +38,7 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
   StreamSubscription<ExitAttempt>? _exitAttemptSub;
   Timer? _pinCheckTimer;
   bool _isLoading = true;
+  bool _requiresRepin = false;
 
   @override
   void initState() {
@@ -51,9 +53,12 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
     _alarmController.addListener(_onAlarmUpdated);
 
     // Native exit-attempt events trigger the alarm immediately.
+    // Suppressed while the re-pin barrier is shown (it already blocks the exam).
     _exitAttemptSub =
         widget.kioskService.exitAttemptStream.listen((attempt) {
-      _alarmController.triggerAlarm(attempt);
+      if (!_requiresRepin && mounted) {
+        _alarmController.triggerAlarm(attempt);
+      }
     });
 
     // Secure window against screenshots
@@ -62,7 +67,7 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
     // Fallback poll in case a native event is missed (e.g. hardware-key unpin).
     _pinCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (_) async {
       final isPinned = await widget.kioskService.isLockTaskActive();
-      if (!isPinned && mounted) {
+      if (!isPinned && mounted && !_requiresRepin) {
         _alarmController.triggerAlarm(ExitAttempt.unpinned);
       }
     });
@@ -113,9 +118,40 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if ((state == AppLifecycleState.paused ||
+            state == AppLifecycleState.inactive) &&
+        !_requiresRepin) {
       _alarmController.triggerAlarm(ExitAttempt.appPaused);
     }
+  }
+
+  /// After a supervisor PIN resolves an alarm, show the re-pin barrier
+  /// if the app is still not pinned. This breaks the resolve -> re-alarm
+  /// loop: the exam stays blocked until the app is pinned again.
+  /// The barrier is set synchronously for the unpinned case so the 500ms
+  /// fallback poll cannot re-fire the alarm before the async check lands.
+  void _handleAlarmResolved(ExitAttempt attempt) {
+    if (attempt == ExitAttempt.unpinned) {
+      setState(() => _requiresRepin = true);
+      return;
+    }
+    widget.kioskService.isLockTaskActive().then((isPinned) {
+      if (!isPinned && mounted) setState(() => _requiresRepin = true);
+    });
+  }
+
+  Widget _buildRepinBarrier() {
+    return Semantics(
+      label:
+          'Aplikasi belum disematkan ulang. Sematkan aplikasi untuk lanjut ujian.',
+      child: PinningGatekeeperScreen(
+        targetExamUrl: widget.examUrl,
+        kioskService: widget.kioskService,
+        onPinConfirmed: () {
+          if (mounted) setState(() => _requiresRepin = false);
+        },
+      ),
+    );
   }
 
   Future<void> _handleExitExam() async {
@@ -343,7 +379,17 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
               // Alarm Overlay
               if (_alarmController.isAlarmActive)
                 Positioned.fill(
-                  child: AlarmOverlayDialog(alarmController: _alarmController),
+                  child: AlarmOverlayDialog(
+                    alarmController: _alarmController,
+                    onResolved: _handleAlarmResolved,
+                  ),
+                ),
+
+              // Re-pin barrier: blocks the exam until the app is pinned again.
+              // The WebView stays alive underneath so form answers are kept.
+              if (_requiresRepin)
+                Positioned.fill(
+                  child: _buildRepinBarrier(),
                 ),
             ],
           ),

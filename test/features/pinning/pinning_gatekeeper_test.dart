@@ -51,6 +51,11 @@ void main() {
     expect(find.textContaining('belum disematkan'), findsOneWidget);
     expect(proceeded, isFalse);
 
+    // Next is disabled while unpinned
+    final nextButton = find.widgetWithText(ElevatedButton, 'Lanjut ke Ujian');
+    expect(nextButton, findsOneWidget);
+    expect(tester.widget<ElevatedButton>(nextButton).onPressed, isNull);
+
     // Simulate pinning success
     mockService.active = true;
     final retryButton = find.widgetWithText(ElevatedButton, 'Sematkan Aplikasi Sekarang');
@@ -59,6 +64,15 @@ void main() {
     await tester.ensureVisible(retryButton);
     await tester.pumpAndSettle();
     await tester.tap(retryButton);
+    await tester.pumpAndSettle();
+
+    // Pinned status shown, Next enabled, proceeds only via Next
+    expect(find.textContaining('tersemat'), findsOneWidget);
+    expect(tester.widget<ElevatedButton>(nextButton).onPressed, isNotNull);
+    expect(proceeded, isFalse);
+
+    await tester.ensureVisible(nextButton);
+    await tester.tap(nextButton);
     await tester.pumpAndSettle();
 
     expect(proceeded, isTrue);

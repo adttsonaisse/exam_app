@@ -34,18 +34,11 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
 
   void _onControllerUpdate() {
     if (!mounted) return;
-    if (_controller.isPinned) {
-      widget.onPinConfirmed();
-    } else {
-      setState(() {});
-    }
+    setState(() {});
   }
 
   Future<void> _verifyAndPin() async {
-    final success = await _controller.checkAndRequestPin();
-    if (success && mounted) {
-      widget.onPinConfirmed();
-    }
+    await _controller.checkAndRequestPin();
   }
 
   @override
@@ -138,8 +131,10 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _controller.errorMessage ??
-                          'Aplikasi belum disematkan. Harap izinkan penyematan layar pada dialog sistem Android agar tidak dapat berpindah aplikasi saat ujian.',
+                      _controller.isPinned
+                          ? 'Perangkat tersemat. Silakan lanjut ke ujian.'
+                          : (_controller.errorMessage ??
+                              'Aplikasi belum disematkan. Harap izinkan penyematan layar pada dialog sistem Android agar tidak dapat berpindah aplikasi saat ujian.'),
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
@@ -235,6 +230,27 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                 textAlign: TextAlign.center,
                 style: textTheme.labelSmall?.copyWith(
                   color: AppTheme.muteOf(context, small: true),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Next CTA — disabled until the app is pinned.
+              ElevatedButton(
+                onPressed:
+                    _controller.isPinned ? widget.onPinConfirmed : null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  ),
+                ),
+                child: const Text(
+                  'Lanjut ke Ujian',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2),
                 ),
               ),
             ],
