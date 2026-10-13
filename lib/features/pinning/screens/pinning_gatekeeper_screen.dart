@@ -60,17 +60,40 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Verifikasi Keamanan'),
+        title: const Text('Sematkan Aplikasi'),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Spacer(),
+              // Security Protocol Timeline Header
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.bone,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  border: Border.all(color: AppTheme.hairline),
+                ),
+                child: Row(
+                  children: [
+                    _buildStepChip('1', 'Scan QR', isCompleted: true),
+                    const Expanded(
+                      child: Divider(color: AppTheme.divider, thickness: 1.5, indent: 8, endIndent: 8),
+                    ),
+                    _buildStepChip('2', 'Sematkan', isActive: true),
+                    const Expanded(
+                      child: Divider(color: AppTheme.hairline, thickness: 1.5, indent: 8, endIndent: 8),
+                    ),
+                    _buildStepChip('3', 'Ujian', isCompleted: false),
+                  ],
+                ),
+              ),
 
-              // Level 1 Border Containment Card (Matte, no artificial drop shadow)
+              const SizedBox(height: 20),
+
+              // Level 1 Border Containment Security Card
               Container(
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
@@ -82,8 +105,8 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 64,
-                      height: 64,
+                      width: 58,
+                      height: 58,
                       decoration: BoxDecoration(
                         color: AppTheme.bone,
                         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
@@ -91,16 +114,16 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                       ),
                       child: const Icon(
                         Icons.screen_lock_portrait_rounded,
-                        size: 32,
+                        size: 28,
                         color: AppTheme.secondaryColor,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                     const Text(
                       'Sematkan Aplikasi untuk Memulai Ujian',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.4,
                         color: AppTheme.foregroundColor,
@@ -118,6 +141,8 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    // Instructional Guidance Box
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -125,28 +150,29 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                         border: Border.all(color: AppTheme.borderColor),
                       ),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Petunjuk Penyematan Layar:',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.foregroundColor,
-                            ),
+                          const Row(
+                            children: [
+                              Icon(Icons.touch_app_outlined, size: 16, color: AppTheme.secondaryColor),
+                              SizedBox(width: 8),
+                              Text(
+                                'Petunjuk Penyematan Layar:',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.foregroundColor,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 6),
-                          Text(
-                            '1. Saat muncul dialog pop-up Android, tekan "Sematkan" (Pin).\n'
-                            '2. Jangan menekan tombol "Batal" atau tombol kembali.\n'
-                            '3. Jika dialog tidak muncul, tekan tombol di bawah ini lagi.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.5,
-                              color: AppTheme.secondaryText,
-                            ),
-                          ),
+                          const SizedBox(height: 10),
+                          _buildInstructionRow('1', 'Saat dialog konfirmasi Android muncul, tekan "Sematkan" (Pin).'),
+                          const SizedBox(height: 6),
+                          _buildInstructionRow('2', 'Jangan menekan tombol "Batal" atau tombol navigasi kembali.'),
+                          const SizedBox(height: 6),
+                          _buildInstructionRow('3', 'Jika dialog belum muncul, ketuk tombol di bawah untuk meminta izin ulang.'),
                         ],
                       ),
                     ),
@@ -154,16 +180,17 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 28),
 
-              // Primary Pinning CTA Button (Flat, purposeful 48px action)
+              // Primary Pinning CTA Button
               ElevatedButton(
                 onPressed: _controller.isLoading ? null : _verifyAndPin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: AppTheme.onPrimary,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 52),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                   ),
@@ -179,14 +206,102 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                       )
                     : const Text(
                         'Sematkan Aplikasi Sekarang',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
                       ),
               ),
               const SizedBox(height: 8),
+              const Text(
+                'Perangkat wajib disematkan sebelum akses ke soal ujian dapat dibuka',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: AppTheme.secondaryText),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStepChip(String stepNumber, String title, {bool isCompleted = false, bool isActive = false}) {
+    Color bg;
+    Color fg;
+    Border? border;
+
+    if (isCompleted) {
+      bg = AppTheme.secondaryColor;
+      fg = Colors.white;
+    } else if (isActive) {
+      bg = AppTheme.primaryColor;
+      fg = AppTheme.onPrimary;
+      border = Border.all(color: AppTheme.secondaryColor, width: 1.2);
+    } else {
+      bg = Colors.transparent;
+      fg = AppTheme.secondaryText;
+      border = Border.all(color: AppTheme.hairline);
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+            border: border,
+          ),
+          child: isCompleted
+              ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+              : Text(
+                  stepNumber,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: fg,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isActive || isCompleted ? FontWeight.w600 : FontWeight.w400,
+            color: isActive || isCompleted ? AppTheme.foregroundColor : AppTheme.secondaryText,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInstructionRow(String number, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 18,
+          height: 18,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppTheme.card,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppTheme.hairline),
+          ),
+          child: Text(
+            number,
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.secondaryColor),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 12, height: 1.45, color: AppTheme.secondaryText),
+          ),
+        ),
+      ],
     );
   }
 }

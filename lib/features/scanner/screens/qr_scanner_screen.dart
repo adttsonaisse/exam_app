@@ -140,14 +140,77 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             controller: _scannerController,
             onDetect: _onDetect,
           ),
-          // Matte Target Frame (Precise, purposeful 2px border, 16px radius, no neon glow)
+          // Precise Matte Viewfinder (Superhuman precision frame, 16px radius, no neon glow)
           Center(
-            child: Container(
+            child: SizedBox(
               width: 260,
               height: 260,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.primaryColor, width: 2),
-                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.6), width: 1.5),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                    ),
+                  ),
+                  // Precision Corner Accents
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                          left: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                        ),
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(AppTheme.radiusLg)),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                          right: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                        ),
+                        borderRadius: BorderRadius.only(topRight: Radius.circular(AppTheme.radiusLg)),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                          left: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                        ),
+                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(AppTheme.radiusLg)),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                          right: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                        ),
+                        borderRadius: BorderRadius.only(bottomRight: Radius.circular(AppTheme.radiusLg)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -157,21 +220,28 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             left: 24,
             right: 24,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppTheme.darkSurface.withValues(alpha: 0.90),
+                color: AppTheme.darkSurface.withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 border: Border.all(color: AppTheme.hairlineDark),
               ),
-              child: const Text(
-                'Arahkan kamera ke QR Code soal ujian Google Form yang diberikan pengawas',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppTheme.onDark,
-                  fontSize: 13,
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: const Row(
+                children: [
+                  Icon(Icons.qr_code_2_rounded, size: 20, color: AppTheme.primaryColor),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Posisikan QR Code lembar ujian tepat di dalam bingkai scanner',
+                      style: TextStyle(
+                        color: AppTheme.onDark,
+                        fontSize: 12,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
