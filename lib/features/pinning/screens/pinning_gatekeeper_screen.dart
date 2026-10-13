@@ -57,8 +57,11 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Sematkan Aplikasi'),
       ),
@@ -72,21 +75,26 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppTheme.bone,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                  border: Border.all(color: AppTheme.hairline),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryContainer,
+                      AppTheme.secondaryContainer,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  border: Border.all(color: scheme.outline),
                 ),
                 child: Row(
                   children: [
-                    _buildStepChip('1', 'Scan QR', isCompleted: true),
-                    const Expanded(
-                      child: Divider(color: AppTheme.divider, thickness: 1.5, indent: 8, endIndent: 8),
+                    _buildStepChip(context, '1', 'Scan QR', isCompleted: true),
+                    Expanded(
+                      child: Divider(color: scheme.outline, thickness: 1.5, indent: 8, endIndent: 8),
                     ),
-                    _buildStepChip('2', 'Sematkan', isActive: true),
-                    const Expanded(
-                      child: Divider(color: AppTheme.hairline, thickness: 1.5, indent: 8, endIndent: 8),
+                    _buildStepChip(context, '2', 'Sematkan', isActive: true),
+                    Expanded(
+                      child: Divider(color: AppTheme.hairlineOf(context), thickness: 1.5, indent: 8, endIndent: 8),
                     ),
-                    _buildStepChip('3', 'Ujian', isCompleted: false),
+                    _buildStepChip(context, '3', 'Ujian', isCompleted: false),
                   ],
                 ),
               ),
@@ -97,36 +105,35 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
               Container(
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  color: AppTheme.card,
+                  color: scheme.surface,
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                  border: Border.all(color: AppTheme.borderColor),
+                  border: Border.all(color: scheme.outline),
+                  boxShadow: AppTheme.cardShadow(context),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 58,
-                      height: 58,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
-                        color: AppTheme.bone,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                        border: Border.all(color: AppTheme.hairline),
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusMd),
+                        boxShadow: AppTheme.primaryShadow,
                       ),
                       child: const Icon(
                         Icons.screen_lock_portrait_rounded,
-                        size: 28,
-                        color: AppTheme.secondaryColor,
+                        size: 30,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text(
+                    Text(
                       'Sematkan Aplikasi untuk Memulai Ujian',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.4,
-                        color: AppTheme.foregroundColor,
+                      style: textTheme.titleLarge?.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -134,10 +141,8 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                       _controller.errorMessage ??
                           'Aplikasi belum disematkan. Harap izinkan penyematan layar pada dialog sistem Android agar tidak dapat berpindah aplikasi saat ujian.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        height: 1.5,
-                        color: AppTheme.secondaryText,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -146,33 +151,35 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppTheme.bone,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                        border: Border.all(color: AppTheme.borderColor),
+                        color: AppTheme.primaryContainer.withValues(
+                            alpha: AppTheme.isDark(context) ? 0.25 : 1),
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusMd),
+                        border: Border.all(color: scheme.outline),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.touch_app_outlined, size: 16, color: AppTheme.secondaryColor),
-                              SizedBox(width: 8),
-                              Text(
-                                'Petunjuk Penyematan Layar:',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.foregroundColor,
+                              Icon(Icons.touch_app_outlined, size: 16, color: scheme.secondary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Petunjuk Penyematan Layar:',
+                                  style: textTheme.titleSmall?.copyWith(
+                                    color: scheme.onSurface,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _buildInstructionRow('1', 'Saat dialog konfirmasi Android muncul, tekan "Sematkan" (Pin).'),
+                          _buildInstructionRow(context, '1', 'Saat dialog konfirmasi Android muncul, tekan "Sematkan" (Pin).'),
                           const SizedBox(height: 6),
-                          _buildInstructionRow('2', 'Jangan menekan tombol "Batal" atau tombol navigasi kembali.'),
+                          _buildInstructionRow(context, '2', 'Jangan menekan tombol "Batal" atau tombol navigasi kembali.'),
                           const SizedBox(height: 6),
-                          _buildInstructionRow('3', 'Jika dialog belum muncul, ketuk tombol di bawah untuk meminta izin ulang.'),
+                          _buildInstructionRow(context, '3', 'Jika dialog belum muncul, ketuk tombol di bawah untuk meminta izin ulang.'),
                         ],
                       ),
                     ),
@@ -183,37 +190,52 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
               const SizedBox(height: 28),
 
               // Primary Pinning CTA Button
-              ElevatedButton(
-                onPressed: _controller.isLoading ? null : _verifyAndPin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: AppTheme.onPrimary,
-                  elevation: 0,
-                  minimumSize: const Size(double.infinity, 52),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                  ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius:
+                      BorderRadius.circular(AppTheme.radiusMd),
+                  boxShadow: AppTheme.primaryShadow,
                 ),
-                child: _controller.isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppTheme.onPrimary,
+                child: ElevatedButton(
+                  onPressed: _controller.isLoading ? null : _verifyAndPin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    elevation: 0,
+                    minimumSize: const Size(double.infinity, 56),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusMd),
+                    ),
+                  ),
+                  child: _controller.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Sematkan Aplikasi Sekarang',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                              color: Colors.white),
                         ),
-                      )
-                    : const Text(
-                        'Sematkan Aplikasi Sekarang',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
-                      ),
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Perangkat wajib disematkan sebelum akses ke soal ujian dapat dibuka',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: AppTheme.secondaryText),
+                style: textTheme.labelSmall?.copyWith(
+                  color: AppTheme.muteOf(context, small: true),
+                ),
               ),
             ],
           ),
@@ -222,22 +244,23 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
     );
   }
 
-  Widget _buildStepChip(String stepNumber, String title, {bool isCompleted = false, bool isActive = false}) {
+  Widget _buildStepChip(BuildContext context, String stepNumber, String title, {bool isCompleted = false, bool isActive = false}) {
+    final scheme = Theme.of(context).colorScheme;
     Color bg;
     Color fg;
     Border? border;
 
     if (isCompleted) {
-      bg = AppTheme.secondaryColor;
+      bg = AppTheme.successText;
       fg = Colors.white;
     } else if (isActive) {
       bg = AppTheme.primaryColor;
-      fg = AppTheme.onPrimary;
-      border = Border.all(color: AppTheme.secondaryColor, width: 1.2);
+      fg = Colors.white;
+      border = Border.all(color: AppTheme.primaryBright, width: 2);
     } else {
       bg = Colors.transparent;
-      fg = AppTheme.secondaryText;
-      border = Border.all(color: AppTheme.hairline);
+      fg = scheme.onSurfaceVariant;
+      border = Border.all(color: scheme.outlineVariant);
     }
 
     return Row(
@@ -253,7 +276,7 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
             border: border,
           ),
           child: isCompleted
-              ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+              ? Icon(Icons.check_rounded, size: 14, color: scheme.onSecondary)
               : Text(
                   stepNumber,
                   style: TextStyle(
@@ -269,14 +292,15 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: isActive || isCompleted ? FontWeight.w600 : FontWeight.w400,
-            color: isActive || isCompleted ? AppTheme.foregroundColor : AppTheme.secondaryText,
+            color: isActive || isCompleted ? scheme.onSurface : scheme.onSurfaceVariant,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInstructionRow(String number, String text) {
+  Widget _buildInstructionRow(BuildContext context, String number, String text) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -285,20 +309,22 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
           height: 18,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: AppTheme.card,
+            color: scheme.surface,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: AppTheme.hairline),
+            border: Border.all(color: scheme.outlineVariant),
           ),
           child: Text(
             number,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.secondaryColor),
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.primaryColor),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: AppTheme.secondaryText),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppTheme.muteOf(context, small: true),
+            ),
           ),
         ),
       ],

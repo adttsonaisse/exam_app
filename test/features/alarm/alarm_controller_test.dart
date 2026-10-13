@@ -1,12 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/features/alarm/controllers/alarm_controller.dart';
-import 'package:exam/features/anti_cheat/services/motion_detector.dart';
 
 class MockKioskService implements KioskSecurityService {
   int volumeCalls = 0;
   int startAlarmCalls = 0;
   int stopAlarmCalls = 0;
+
+  @override
+  Stream<ExitAttempt> get exitAttemptStream => const Stream.empty();
 
   @override
   Future<void> maximizeAlarmVolume() async => volumeCalls++;
@@ -36,11 +38,11 @@ void main() {
     final controller = AlarmController(kioskService: mockKiosk, supervisorPin: '123456');
 
     expect(controller.isAlarmActive, isFalse);
-    expect(controller.currentViolation, isNull);
+    expect(controller.currentAttempt, isNull);
 
-    controller.triggerAlarm(ViolationType.extremeTilt);
+    controller.triggerAlarm(ExitAttempt.backPressed);
     expect(controller.isAlarmActive, isTrue);
-    expect(controller.currentViolation, ViolationType.extremeTilt);
+    expect(controller.currentAttempt, ExitAttempt.backPressed);
     expect(mockKiosk.startAlarmCalls, greaterThanOrEqualTo(1));
 
     // Wrong PIN
@@ -53,7 +55,21 @@ void main() {
     final correct = controller.resolveAlarm('123456');
     expect(correct, isTrue);
     expect(controller.isAlarmActive, isFalse);
-    expect(controller.currentViolation, isNull);
+    expect(controller.currentAttempt, isNull);
     expect(mockKiosk.stopAlarmCalls, 1);
+  });
+
+  test('Repeated exit attempts while alarm is active do not restart the audio loop', () {
+    final mockKiosk = MockKioskService();
+    final controller = AlarmController(kioskService: mockKiosk);
+
+    controller.triggerAlarm(ExitAttempt.backPressed);
+    controller.triggerAlarm(ExitAttempt.windowFocusLost);
+    controller.triggerAlarm(ExitAttempt.appPaused);
+    controller.triggerAlarm(ExitAttempt.unpinned);
+
+    expect(controller.isAlarmActive, isTrue);
+    expect(controller.currentAttempt, ExitAttempt.unpinned);
+    expect(mockKiosk.startAlarmCalls, 1);
   });
 }

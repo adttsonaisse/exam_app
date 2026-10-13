@@ -53,31 +53,36 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
         return AlertDialog(
-          backgroundColor: AppTheme.surfaceColor,
+          backgroundColor: Theme.of(context).dialogTheme.backgroundColor ??
+              scheme.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-            side: const BorderSide(color: AppTheme.borderColor),
+            side: BorderSide(color: scheme.outline),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppTheme.badgeWarning, size: 22),
-              SizedBox(width: 10),
-              Text(
-                'QR Code Tidak Valid',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.foregroundColor,
-                  letterSpacing: -0.3,
+              const Icon(Icons.warning_amber_rounded, color: AppTheme.badgeWarning, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'QR Code Tidak Valid',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: scheme.onSurface),
                 ),
               ),
             ],
           ),
           content: Text(
             'QR code yang dipindai bukan tautan resmi Google Forms ujian.\n\nIsi QR: $rawValue',
-            style: const TextStyle(fontSize: 14, height: 1.45, color: AppTheme.secondaryText),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: scheme.onSurfaceVariant),
           ),
           actions: [
             ElevatedButton(
@@ -105,8 +110,10 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navInset = MediaQuery.of(context).viewPadding.bottom;
     return Scaffold(
       backgroundColor: AppTheme.deepSurface,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: AppTheme.deepSurface,
         foregroundColor: AppTheme.onDark,
@@ -116,21 +123,34 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, letterSpacing: -0.3),
         ),
         actions: [
-          IconButton(
-            icon: ValueListenableBuilder<MobileScannerState>(
-              valueListenable: _scannerController,
-              builder: (context, state, child) {
-                switch (state.torchState) {
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on, color: AppTheme.heroGlow);
-                  case TorchState.off:
-                  case TorchState.unavailable:
-                  case TorchState.auto:
-                    return const Icon(Icons.flash_off, color: AppTheme.onDark);
-                }
-              },
-            ),
-            onPressed: () => _scannerController.toggleTorch(),
+          ValueListenableBuilder<MobileScannerState>(
+            valueListenable: _scannerController,
+            builder: (context, state, child) {
+              final unavailable =
+                  state.torchState == TorchState.unavailable;
+              final isOn = state.torchState == TorchState.on;
+              return Semantics(
+                button: true,
+                enabled: !unavailable,
+                toggled: isOn,
+                label: 'Alihkan lampu kilat',
+                child: IconButton(
+                  tooltip: 'Alihkan lampu kilat',
+                  onPressed: unavailable
+                      ? null
+                      : () => _scannerController.toggleTorch(),
+                  icon: Icon(
+                    isOn ? Icons.flash_on : Icons.flash_off,
+                    color: isOn
+                        ? AppTheme.heroCyan
+                        : AppTheme.onDark,
+                    semanticLabel: isOn
+                        ? 'Lampu kilat menyala'
+                        : 'Lampu kilat mati',
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -140,7 +160,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             controller: _scannerController,
             onDetect: _onDetect,
           ),
-          // Precise Matte Viewfinder (Superhuman precision frame, 16px radius, no neon glow)
+          // Precise Matte Viewfinder (vivid violet frame + cyan corners)
           Center(
             child: SizedBox(
               width: 260,
@@ -149,64 +169,87 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.6), width: 1.5),
+                      color: Colors.white.withValues(alpha: 0.04),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.85), width: 1.5),
                       borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.heroCyan.withValues(alpha: 0.35),
+                          offset: const Offset(0, 0),
+                          blurRadius: 32,
+                          spreadRadius: 0,
+                        ),
+                      ],
                     ),
                   ),
                   // Precision Corner Accents
                   Align(
                     alignment: Alignment.topLeft,
                     child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: AppTheme.primaryColor, width: 3.5),
-                          left: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        border: const Border(
+                          top: BorderSide(color: AppTheme.heroCyan, width: 5),
+                          left: BorderSide(color: AppTheme.heroCyan, width: 5),
                         ),
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(AppTheme.radiusLg)),
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(AppTheme.radiusLg)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.heroCyan.withValues(alpha: 0.6),
+                            offset: const Offset(0, 2),
+                            blurRadius: 12,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Align(
                     alignment: Alignment.topRight,
                     child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: AppTheme.primaryColor, width: 3.5),
-                          right: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        border: const Border(
+                          top: BorderSide(color: AppTheme.heroCyan, width: 5),
+                          right: BorderSide(color: AppTheme.heroCyan, width: 5),
                         ),
-                        borderRadius: BorderRadius.only(topRight: Radius.circular(AppTheme.radiusLg)),
+                        borderRadius: const BorderRadius.only(topRight: Radius.circular(AppTheme.radiusLg)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.heroCyan.withValues(alpha: 0.6),
+                            offset: const Offset(0, 2),
+                            blurRadius: 12,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: AppTheme.primaryColor, width: 3.5),
-                          left: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        border: const Border(
+                          bottom: BorderSide(color: AppTheme.primaryBright, width: 5),
+                          left: BorderSide(color: AppTheme.primaryBright, width: 5),
                         ),
-                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(AppTheme.radiusLg)),
+                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(AppTheme.radiusLg)),
                       ),
                     ),
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: AppTheme.primaryColor, width: 3.5),
-                          right: BorderSide(color: AppTheme.primaryColor, width: 3.5),
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        border: const Border(
+                          bottom: BorderSide(color: AppTheme.primaryBright, width: 5),
+                          right: BorderSide(color: AppTheme.primaryBright, width: 5),
                         ),
-                        borderRadius: BorderRadius.only(bottomRight: Radius.circular(AppTheme.radiusLg)),
+                        borderRadius: const BorderRadius.only(bottomRight: Radius.circular(AppTheme.radiusLg)),
                       ),
                     ),
                   ),
@@ -216,19 +259,25 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
           ),
           // Guidance banner (Matte dark chip, warm on-dark text)
           Positioned(
-            bottom: 48,
+            bottom: navInset + 24,
             left: 24,
             right: 24,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppTheme.darkSurface.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                border: Border.all(color: AppTheme.hairlineDark),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                border:
+                    Border.all(color: AppTheme.heroCyan.withValues(alpha: 0.4)),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.qr_code_2_rounded, size: 20, color: AppTheme.primaryColor),
+                  Icon(Icons.qr_code_2_rounded,
+                      size: 22, color: AppTheme.heroCyan),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -237,7 +286,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                         color: AppTheme.onDark,
                         fontSize: 12,
                         height: 1.4,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

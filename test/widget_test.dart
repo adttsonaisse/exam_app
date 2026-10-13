@@ -8,6 +8,9 @@ class MockKioskService implements KioskSecurityService {
   int alarmVolumeCalls = 0;
 
   @override
+  Stream<ExitAttempt> get exitAttemptStream => const Stream.empty();
+
+  @override
   Future<bool> isLockTaskActive() async => isPinned;
 
   @override
@@ -45,7 +48,7 @@ void main() {
     await tester.pump();
 
     // 1. Verify Home Screen is visible
-    expect(find.text('Ujian Aman (Exam Shield)'), findsOneWidget);
+    expect(find.textContaining('Fokus Penuh'), findsOneWidget);
     expect(find.text('Scan QR Ujian'), findsOneWidget);
 
     // 2. Trigger scan callback (simulating QR scan)

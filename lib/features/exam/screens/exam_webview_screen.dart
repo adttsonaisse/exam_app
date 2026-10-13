@@ -7,14 +7,12 @@ import 'package:exam/core/validators/exam_url_validator.dart';
 import 'package:exam/core/validators/supervisor_pin_validator.dart';
 import 'package:exam/features/alarm/controllers/alarm_controller.dart';
 import 'package:exam/features/alarm/widgets/alarm_overlay_dialog.dart';
-import 'package:exam/features/anti_cheat/services/motion_detector.dart';
 
 class ExamWebViewScreen extends StatefulWidget {
   final String examUrl;
   final KioskSecurityService kioskService;
   final String supervisorPin;
   final VoidCallback onExamCompleted;
-  final MotionDetector? customMotionDetector;
   final AlarmController? customAlarmController;
   final WebViewController? customWebViewController;
 
@@ -24,7 +22,6 @@ class ExamWebViewScreen extends StatefulWidget {
     required this.kioskService,
     required this.onExamCompleted,
     this.supervisorPin = SupervisorPinValidator.defaultSupervisorPin,
-    this.customMotionDetector,
     this.customAlarmController,
     this.customWebViewController,
   });
@@ -35,10 +32,9 @@ class ExamWebViewScreen extends StatefulWidget {
 
 class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindingObserver {
   WebViewController? _webViewController;
-  late final MotionDetector _motionDetector;
   late final AlarmController _alarmController;
 
-  StreamSubscription<ViolationType>? _violationSub;
+  StreamSubscription<ExitAttempt>? _exitAttemptSub;
   Timer? _pinCheckTimer;
   bool _isLoading = true;
 
@@ -54,20 +50,20 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
         );
     _alarmController.addListener(_onAlarmUpdated);
 
-    _motionDetector = widget.customMotionDetector ?? MotionDetector();
-    _violationSub = _motionDetector.violationStream.listen((violation) {
-      _alarmController.triggerAlarm(violation);
+    // Native exit-attempt events trigger the alarm immediately.
+    _exitAttemptSub =
+        widget.kioskService.exitAttemptStream.listen((attempt) {
+      _alarmController.triggerAlarm(attempt);
     });
-    _motionDetector.startMonitoring();
 
     // Secure window against screenshots
     widget.kioskService.setWindowSecure(true);
 
-    // Periodically verify lock task is still active (detect unpinning via hardware keys)
-    _pinCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+    // Fallback poll in case a native event is missed (e.g. hardware-key unpin).
+    _pinCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (_) async {
       final isPinned = await widget.kioskService.isLockTaskActive();
       if (!isPinned && mounted) {
-        _alarmController.triggerAlarm(ViolationType.unpinned);
+        _alarmController.triggerAlarm(ExitAttempt.unpinned);
       }
     });
 
@@ -118,7 +114,7 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _alarmController.triggerAlarm(ViolationType.appPaused);
+      _alarmController.triggerAlarm(ExitAttempt.appPaused);
     }
   }
 
@@ -130,55 +126,66 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: AppTheme.surfaceColor,
+              backgroundColor: Theme.of(context).dialogTheme.backgroundColor ??
+                  scheme.surface,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                side: const BorderSide(color: AppTheme.borderColor),
+                side: BorderSide(color: scheme.outline),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.lock_outline_rounded, color: AppTheme.secondaryColor),
-                  SizedBox(width: 10),
-                  Text(
-                    'Otorisasi Selesai Ujian',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.foregroundColor,
+                  Icon(Icons.lock_outline_rounded, color: scheme.secondary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Otorisasi Selesai Ujian',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: scheme.onSurface),
                     ),
                   ),
                 ],
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Untuk mengakhiri sesi ujian dan membuka kunci aplikasi, pengawas wajib memasukkan PIN Pengawas.',
-                    style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.secondaryText),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: pinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    maxLength: 6,
-                    decoration: InputDecoration(
-                      labelText: 'PIN Pengawas',
-                      errorText: errorText,
+              content: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Untuk mengakhiri sesi ujian dan membuka kunci aplikasi, pengawas wajib memasukkan PIN Pengawas.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: pinController,
+                      keyboardType: TextInputType.number,
+                      obscureText: true,
+                      maxLength: 6,
+                      decoration: InputDecoration(
+                        labelText: 'PIN Pengawas',
+                        errorText: errorText,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.secondaryText,
+                    foregroundColor: scheme.onSurfaceVariant,
                   ),
                   child: const Text('Batal'),
                 ),
@@ -224,65 +231,82 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pinCheckTimer?.cancel();
-    _violationSub?.cancel();
-    _motionDetector.dispose();
+    _exitAttemptSub?.cancel();
     _alarmController.removeListener(_onAlarmUpdated);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return PopScope(
       canPop: false, // Disable hardware back button
       child: Scaffold(
-        backgroundColor: AppTheme.backgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: Stack(
             children: [
               // Main WebView
               Column(
                 children: [
-                  // Superhuman Minimalist Top Status Bar
+                  // Vibrant locked-session status bar
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.surfaceColor,
-                      border: Border(bottom: BorderSide(color: AppTheme.borderColor)),
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      border: Border(bottom: BorderSide(color: scheme.outline)),
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(7),
                           decoration: BoxDecoration(
-                            color: AppTheme.bone,
-                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                            gradient: AppTheme.primaryGradient,
+                            borderRadius:
+                                BorderRadius.circular(AppTheme.radiusSm),
+                            boxShadow: AppTheme.primaryShadow,
                           ),
                           child: const Icon(
                             Icons.shield_rounded,
                             size: 16,
-                            color: AppTheme.secondaryColor,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Sesi Ujian Terkunci',
+                                style: textTheme.titleSmall?.copyWith(
+                                  color: scheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                'Mode kunci aktif • Tetap di halaman ujian',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: AppTheme.isDark(context)
+                                      ? AppTheme.secondaryBright
+                                      : AppTheme.secondaryTextLight,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Sesi Ujian Terkunci',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.2,
-                            color: AppTheme.foregroundColor,
-                          ),
-                        ),
-                        const Spacer(),
                         OutlinedButton(
                           onPressed: _handleExitExam,
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: AppTheme.canvas,
-                            foregroundColor: AppTheme.foregroundColor,
-                            side: const BorderSide(color: AppTheme.hairline),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            backgroundColor: scheme.surface,
+                            foregroundColor: scheme.onSurface,
+                            side: BorderSide(color: scheme.outlineVariant),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            minimumSize: const Size(48, 48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                             ),
@@ -296,18 +320,20 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
                     ),
                   ),
                   if (_isLoading)
-                    const LinearProgressIndicator(
-                      color: AppTheme.secondaryColor,
-                      backgroundColor: AppTheme.bone,
-                      minHeight: 2,
+                    LinearProgressIndicator(
+                      color: AppTheme.primaryBright,
+                      backgroundColor: AppTheme.primaryContainer,
+                      minHeight: 3,
                     ),
                   Expanded(
                     child: _webViewController != null
                         ? WebViewWidget(controller: _webViewController!)
-                        : const Center(
+                        : Center(
                             child: Text(
                               'Halaman Ujian Google Form',
-                              style: TextStyle(color: AppTheme.secondaryText),
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
                   ),

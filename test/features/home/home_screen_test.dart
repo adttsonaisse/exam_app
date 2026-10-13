@@ -11,7 +11,7 @@ void main() {
       ),
     ));
 
-    expect(find.text('Ujian Aman (Exam Shield)'), findsOneWidget);
+    expect(find.textContaining('Fokus Penuh'), findsOneWidget);
     expect(find.text('Kamera Scanner'), findsOneWidget);
     expect(find.text('Koneksi Internet'), findsOneWidget);
     expect(find.text('Scan QR Ujian'), findsOneWidget);

@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/core/theme/app_theme.dart';
@@ -58,12 +59,36 @@ class _ExamAppState extends State<ExamApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Exam Shield',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: _buildCurrentScreen(),
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        var light = AppTheme.lightTheme;
+        var dark = AppTheme.darkTheme;
+        if (lightDynamic != null) {
+          light = light.copyWith(
+            colorScheme: lightDynamic.copyWith(
+              primary: AppTheme.primaryColor,
+              onPrimary: AppTheme.onPrimary,
+              secondary: AppTheme.secondaryColor,
+            ),
+          );
+        }
+        if (darkDynamic != null) {
+          dark = dark.copyWith(
+            colorScheme: darkDynamic.copyWith(
+              primary: AppTheme.primaryColor,
+              secondary: AppTheme.linkDark,
+            ),
+          );
+        }
+        return MaterialApp(
+          title: 'Exam Shield',
+          debugShowCheckedModeBanner: false,
+          theme: light,
+          darkTheme: dark,
+          themeMode: ThemeMode.system,
+          home: _buildCurrentScreen(),
+        );
+      },
     );
   }
 

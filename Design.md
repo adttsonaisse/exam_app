@@ -1,8 +1,8 @@
 ---
-name: superhuman
+name: superhuman-vibrant
 colors:
   canvas: "#ffffff"
-  bone: "#f5f4f2"
+  bone: "#f3f0ff"
   card: "#ffffff"
   dark: "#1c1b1a"
   deep: "#121111"
@@ -13,21 +13,27 @@ colors:
   ash: "rgba(41,40,39,0.4)"
   stone: "rgba(41,40,39,0.3)"
   on-dark: "#fcfcfc"
-  on-dark-mute: "rgba(252,252,252,0.72)"
-  hero-warm: "#1b1938"
-  hero-glow: "#cbb7fb"
-  hero-pink: "#cbb7fb"
-  link: "#714cb6"
-  ring-focus: "rgba(203,183,251,0.5)"
-  badge-success: "#2b9a66"
+  on-dark-mute: "rgba(252,252,252,0.92)"
+  primary: "#6d28d9"
+  primary-bright: "#8b5cf6"
+  secondary: "#0284c7"
+  secondary-bright: "#22d3ee"
+  hero-warm: "#1e1b4b"
+  hero-mid: "#6d28d9"
+  hero-glow: "#a78bfa"
+  hero-cyan: "#22d3ee"
+  hero-pink: "#a78bfa"
+  link: "#6d28d9"
+  ring-focus: "#8b5cf6"
+  badge-success: "#16a34a"
   badge-warning: "#f59e0b"
-  badge-info: "#3b82f6"
-  hairline: "#ece9e5"
-  divider: "#dcd7d3"
+  badge-info: "#0284c7"
+  hairline: "#e9e3f8"
+  divider: "#ddd6fe"
 colors-dark:
-  canvas: "#121111"
-  bone: "#1a1918"
-  card: "#252423"
+  canvas: "#14121f"
+  bone: "#1e1b2e"
+  card: "#232030"
   dark: "#1c1b1a"
   deep: "#121111"
   ink: "rgba(255,255,255,0.92)"
@@ -37,17 +43,17 @@ colors-dark:
   ash: "rgba(255,255,255,0.4)"
   stone: "rgba(255,255,255,0.25)"
   on-dark: "#fcfcfc"
-  on-dark-mute: "rgba(252,252,252,0.72)"
-  hero-warm: "#1b1938"
-  hero-glow: "#cbb7fb"
-  hero-pink: "#cbb7fb"
+  on-dark-mute: "rgba(252,252,252,0.92)"
+  hero-warm: "#1e1b4b"
+  hero-glow: "#a78bfa"
+  hero-pink: "#a78bfa"
   link: "#cbb7fb"
-  ring-focus: "rgba(203,183,251,0.5)"
-  badge-success: "#2b9a66"
+  ring-focus: "#cbb7fb"
+  badge-success: "#16a34a"
   badge-warning: "#f59e0b"
-  badge-info: "#3b82f6"
-  hairline: "#252423"
-  divider: "#3a3938"
+  badge-info: "#0284c7"
+  hairline: "#2e2a45"
+  divider: "#3b3557"
 typography:
   fontFamily: "\"Super Sans VF\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif"
   display-xl:
@@ -99,10 +105,11 @@ spacing:
   band: 120px
 rounded:
   none: 0
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
+  xs: 6px
+  sm: 12px
+  md: 16px
+  lg: 20px
+  xl: 24px
   full: 9999px
 components:
   button-primary:

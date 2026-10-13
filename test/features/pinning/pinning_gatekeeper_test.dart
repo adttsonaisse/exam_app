@@ -7,6 +7,9 @@ class MockKioskService implements KioskSecurityService {
   bool active = false;
 
   @override
+  Stream<ExitAttempt> get exitAttemptStream => const Stream.empty();
+
+  @override
   Future<bool> isLockTaskActive() async => active;
 
   @override
@@ -53,6 +56,8 @@ void main() {
     final retryButton = find.widgetWithText(ElevatedButton, 'Sematkan Aplikasi Sekarang');
     expect(retryButton, findsOneWidget);
 
+    await tester.ensureVisible(retryButton);
+    await tester.pumpAndSettle();
     await tester.tap(retryButton);
     await tester.pumpAndSettle();
 

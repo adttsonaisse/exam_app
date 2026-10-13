@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/core/validators/supervisor_pin_validator.dart';
-import 'package:exam/features/anti_cheat/services/motion_detector.dart';
 
 class AlarmController extends ChangeNotifier {
   final KioskSecurityService kioskService;
   final String supervisorPin;
 
   bool _isAlarmActive = false;
-  ViolationType? _currentViolation;
+  ExitAttempt? _currentAttempt;
 
   AlarmController({
     required this.kioskService,
@@ -16,11 +15,15 @@ class AlarmController extends ChangeNotifier {
   });
 
   bool get isAlarmActive => _isAlarmActive;
-  ViolationType? get currentViolation => _currentViolation;
+  ExitAttempt? get currentAttempt => _currentAttempt;
 
-  void triggerAlarm(ViolationType violation) {
+  void triggerAlarm(ExitAttempt attempt) {
+    _currentAttempt = attempt;
+    if (_isAlarmActive) {
+      notifyListeners();
+      return;
+    }
     _isAlarmActive = true;
-    _currentViolation = violation;
     kioskService.startAlarm();
     notifyListeners();
   }
@@ -29,7 +32,7 @@ class AlarmController extends ChangeNotifier {
     final isValid = SupervisorPinValidator.verifyPin(inputPin, expectedPin: supervisorPin);
     if (isValid) {
       _isAlarmActive = false;
-      _currentViolation = null;
+      _currentAttempt = null;
       kioskService.stopAlarm();
       notifyListeners();
       return true;
