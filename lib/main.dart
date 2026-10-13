@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/core/theme/app_theme.dart';
+import 'package:exam/core/validators/supervisor_pin_validator.dart';
 import 'package:exam/features/exam/screens/exam_webview_screen.dart';
 import 'package:exam/features/home/screens/home_screen.dart';
 import 'package:exam/features/pinning/screens/pinning_gatekeeper_screen.dart';
@@ -23,6 +24,7 @@ class _ExamAppState extends State<ExamApp> {
   late final KioskSecurityService _kioskService;
   String? _activeExamUrl;
   bool _isPinConfirmed = false;
+  String _supervisorPin = SupervisorPinValidator.defaultSupervisorPin;
 
   @override
   void initState() {
@@ -68,6 +70,8 @@ class _ExamAppState extends State<ExamApp> {
     // Stage 1: Home Screen (Scan QR)
     if (_activeExamUrl == null) {
       return HomeScreen(
+        currentSupervisorPin: _supervisorPin,
+        onSupervisorPinChanged: (newPin) => setState(() => _supervisorPin = newPin),
         onUrlScanned: _onUrlScanned,
       );
     }
@@ -85,6 +89,7 @@ class _ExamAppState extends State<ExamApp> {
     return ExamWebViewScreen(
       examUrl: _activeExamUrl!,
       kioskService: _kioskService,
+      supervisorPin: _supervisorPin,
       onExamCompleted: _onExamCompleted,
     );
   }

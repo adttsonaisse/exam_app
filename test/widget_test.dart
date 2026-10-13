@@ -27,6 +27,14 @@ class MockKioskService implements KioskSecurityService {
   Future<void> maximizeAlarmVolume() async {
     alarmVolumeCalls++;
   }
+
+  @override
+  Future<void> startAlarm() async {
+    alarmVolumeCalls++;
+  }
+
+  @override
+  Future<void> stopAlarm() async {}
 }
 
 void main() {

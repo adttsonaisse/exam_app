@@ -5,7 +5,9 @@ void main() {
   group('ExamUrlValidator', () {
     test('accepts valid Google Forms URLs', () {
       expect(ExamUrlValidator.isValidGoogleFormUrl('https://forms.gle/abc123xyz'), isTrue);
+      expect(ExamUrlValidator.isValidGoogleFormUrl('https://forms.gle/abc123xyz?usp=sf_link'), isTrue);
       expect(ExamUrlValidator.isValidGoogleFormUrl('https://docs.google.com/forms/d/e/1FAIpQLSc9/viewform'), isTrue);
+      expect(ExamUrlValidator.isValidGoogleFormUrl('https://docs.google.com/forms/u/0/d/e/1FAIpQLSc9/viewform'), isTrue);
       expect(ExamUrlValidator.isValidGoogleFormUrl('https://docs.google.com/forms/d/e/1FAIpQLSc9/viewform?usp=sf_link'), isTrue);
     });
 

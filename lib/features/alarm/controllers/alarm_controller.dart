@@ -21,7 +21,7 @@ class AlarmController extends ChangeNotifier {
   void triggerAlarm(ViolationType violation) {
     _isAlarmActive = true;
     _currentViolation = violation;
-    kioskService.maximizeAlarmVolume();
+    kioskService.startAlarm();
     notifyListeners();
   }
 
@@ -30,6 +30,7 @@ class AlarmController extends ChangeNotifier {
     if (isValid) {
       _isAlarmActive = false;
       _currentViolation = null;
+      kioskService.stopAlarm();
       notifyListeners();
       return true;
     }

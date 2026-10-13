@@ -15,12 +15,24 @@ class AlarmOverlayDialog extends StatefulWidget {
   State<AlarmOverlayDialog> createState() => _AlarmOverlayDialogState();
 }
 
-class _AlarmOverlayDialogState extends State<AlarmOverlayDialog> {
+class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
   final TextEditingController _pinController = TextEditingController();
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
+  }
+
+  @override
   void dispose() {
+    _pulseController.dispose();
     _pinController.dispose();
     super.dispose();
   }
@@ -33,6 +45,8 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog> {
         return 'Terdeteksi perangkat diangkat melebihi batas wajar!';
       case ViolationType.suddenShake:
         return 'Terdeteksi gerakan guncangan/hentakan mendadak!';
+      case ViolationType.flipDown:
+        return 'Terdeteksi perangkat dibalik (layar menghadap ke bawah)!';
       case ViolationType.unpinned:
         return 'Peringatan: Aplikasi dilepas dari mode sematan (unpinned)!';
       case ViolationType.appPaused:
@@ -54,8 +68,15 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.red.shade900.withValues(alpha: 0.95),
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final alpha = 0.85 + (_pulseController.value * 0.12);
+        return Container(
+          color: Colors.red.shade900.withValues(alpha: alpha),
+          child: child,
+        );
+      },
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),

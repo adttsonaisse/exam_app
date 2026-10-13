@@ -3,7 +3,7 @@ class ExamUrlValidator {
   // 1. https://forms.gle/[id]
   // 2. https://docs.google.com/forms/d/...
   static final RegExp _googleFormsPattern = RegExp(
-    r'^https:\/\/(forms\.gle\/[a-zA-Z0-9_\-]+|docs\.google\.com\/forms\/d\/(?:e\/[a-zA-Z0-9_\-]+|[a-zA-Z0-9_\-]+)\/(?:viewform|edit|formResponse)(?:\?.*)?)$',
+    r'^https:\/\/(forms\.gle\/[a-zA-Z0-9_\-]+(?:\?.*)?|docs\.google\.com\/forms\/(?:u\/\d+\/)?d\/(?:e\/[a-zA-Z0-9_\-]+|[a-zA-Z0-9_\-]+)\/(?:viewform|edit|formResponse)(?:\?.*)?)$',
     caseSensitive: false,
   );
 

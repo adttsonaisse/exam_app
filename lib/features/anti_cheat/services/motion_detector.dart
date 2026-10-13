@@ -7,6 +7,7 @@ enum ViolationType {
   extremeTilt,
   verticalLift,
   suddenShake,
+  flipDown,
   unpinned,
   appPaused,
 }
@@ -37,14 +38,20 @@ class MotionDetector {
         final z = event.z;
 
         final magnitude = sqrt(x * x + y * y + z * z);
-        final pitch = atan2(-x, sqrt(y * y + z * z)) * 180.0 / pi;
-        final roll = atan2(y, z) * 180.0 / pi;
+        // Portrait phone reference:
+        // pitch: vertical lift (y axis relative to z)
+        final pitch = atan2(y.abs(), z.abs()) * 180.0 / pi;
+        // roll: lateral tilt left/right (x axis relative to z)
+        final roll = atan2(x.abs(), z.abs()) * 180.0 / pi;
+        // z < -3.0 indicates screen facing down onto surface
+        final isFlippedDown = z < -3.0;
 
         _processReading(
           MotionReading(
-            pitch: pitch.abs(),
-            roll: roll.abs(),
+            pitch: pitch,
+            roll: roll,
             accelMagnitude: magnitude,
+            isFlippedDown: isFlippedDown,
           ),
         );
       });
@@ -52,11 +59,17 @@ class MotionDetector {
   }
 
   void _processReading(MotionReading reading) {
-    ViolationType? detected;
-
-    // Check thresholds
+    // 1. Sudden Shake: Impulsive acceleration spike (> 25 m/s^2).
+    // An impulsive shake is emitted immediately without waiting for a 1.5s hold.
     if (reading.accelMagnitude > 25.0) {
-      detected = ViolationType.suddenShake;
+      _violationController.add(ViolationType.suddenShake);
+      return;
+    }
+
+    // 2. Continuous orientation angles use debouncing to filter out transient desk bumps.
+    ViolationType? detected;
+    if (reading.isFlippedDown) {
+      detected = ViolationType.flipDown;
     } else if (reading.pitch > 75.0) {
       detected = ViolationType.verticalLift;
     } else if (reading.roll > 60.0) {
@@ -65,7 +78,6 @@ class MotionDetector {
 
     if (detected != null) {
       if (_pendingViolation == detected) {
-        // Still pending the same violation, let debounce timer run
         return;
       }
       _pendingViolation = detected;
@@ -77,7 +89,6 @@ class MotionDetector {
         }
       });
     } else {
-      // Normal reading cancels any transient anomaly
       _pendingViolation = null;
       _debounceTimer?.cancel();
       _debounceTimer = null;

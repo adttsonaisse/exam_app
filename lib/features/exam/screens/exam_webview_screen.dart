@@ -12,6 +12,7 @@ import 'package:exam/features/anti_cheat/services/motion_detector.dart';
 class ExamWebViewScreen extends StatefulWidget {
   final String examUrl;
   final KioskSecurityService kioskService;
+  final String supervisorPin;
   final VoidCallback onExamCompleted;
   final MotionDetector? customMotionDetector;
   final AlarmController? customAlarmController;
@@ -22,6 +23,7 @@ class ExamWebViewScreen extends StatefulWidget {
     required this.examUrl,
     required this.kioskService,
     required this.onExamCompleted,
+    this.supervisorPin = SupervisorPinValidator.defaultSupervisorPin,
     this.customMotionDetector,
     this.customAlarmController,
     this.customWebViewController,
@@ -46,7 +48,10 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
     WidgetsBinding.instance.addObserver(this);
 
     _alarmController = widget.customAlarmController ??
-        AlarmController(kioskService: widget.kioskService);
+        AlarmController(
+          kioskService: widget.kioskService,
+          supervisorPin: widget.supervisorPin,
+        );
     _alarmController.addListener(_onAlarmUpdated);
 
     _motionDetector = widget.customMotionDetector ?? MotionDetector();
@@ -159,7 +164,10 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final isValid = SupervisorPinValidator.verifyPin(pinController.text.trim());
+                    final isValid = SupervisorPinValidator.verifyPin(
+                      pinController.text.trim(),
+                      expectedPin: widget.supervisorPin,
+                    );
                     if (isValid) {
                       Navigator.pop(context, true);
                     } else {

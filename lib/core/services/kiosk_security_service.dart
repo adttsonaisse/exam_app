@@ -15,6 +15,12 @@ abstract class KioskSecurityService {
 
   /// Maximize alarm / media stream volume.
   Future<void> maximizeAlarmVolume();
+
+  /// Start playing alarm siren tone and loop vibration.
+  Future<void> startAlarm();
+
+  /// Stop alarm siren tone and vibration.
+  Future<void> stopAlarm();
 }
 
 class MethodChannelKioskSecurityService implements KioskSecurityService {
@@ -66,6 +72,24 @@ class MethodChannelKioskSecurityService implements KioskSecurityService {
   Future<void> maximizeAlarmVolume() async {
     try {
       await channel.invokeMethod<void>('maximizeAlarmVolume');
+    } catch (_) {
+      // Platform error handling
+    }
+  }
+
+  @override
+  Future<void> startAlarm() async {
+    try {
+      await channel.invokeMethod<void>('startAlarm');
+    } catch (_) {
+      // Platform error handling
+    }
+  }
+
+  @override
+  Future<void> stopAlarm() async {
+    try {
+      await channel.invokeMethod<void>('stopAlarm');
     } catch (_) {
       // Platform error handling
     }

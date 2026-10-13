@@ -50,22 +50,40 @@ void main() {
       await controller.close();
     });
 
-    test('detects sudden shake and emits violation', () async {
+    test('detects sudden shake immediately even if reading returns to normal quickly', () async {
       final controller = StreamController<MotionReading>();
       final violations = <ViolationType>[];
       final sub = detector.violationStream.listen(violations.add);
       detector.startMonitoring(testStream: controller.stream);
 
-      // Extreme jerk / acceleration spike (> 25 m/s^2)
+      // Transient acceleration spike (> 25 m/s^2) for only 20ms
       controller.add(const MotionReading(pitch: 10.0, roll: 0.0, accelMagnitude: 28.0));
-      await Future.delayed(const Duration(milliseconds: 150));
+      await Future.delayed(const Duration(milliseconds: 20));
+      controller.add(const MotionReading(pitch: 10.0, roll: 0.0, accelMagnitude: 9.8));
+      await Future.delayed(const Duration(milliseconds: 50));
+
       expect(violations, contains(ViolationType.suddenShake));
 
       await sub.cancel();
       await controller.close();
     });
 
-    test('ignores momentary spike shorter than debounce duration', () async {
+    test('detects flip down and emits violation', () async {
+      final controller = StreamController<MotionReading>();
+      final violations = <ViolationType>[];
+      final sub = detector.violationStream.listen(violations.add);
+      detector.startMonitoring(testStream: controller.stream);
+
+      // Flip down screen onto desk sustained
+      controller.add(const MotionReading(pitch: 0.0, roll: 0.0, accelMagnitude: 9.8, isFlippedDown: true));
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(violations, contains(ViolationType.flipDown));
+
+      await sub.cancel();
+      await controller.close();
+    });
+
+    test('ignores momentary tilt spike shorter than debounce duration', () async {
       final controller = StreamController<MotionReading>();
       final violations = <ViolationType>[];
       final sub = detector.violationStream.listen(violations.add);

@@ -24,17 +24,19 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  test('calls startLockTask, stopLockTask, isLockTaskActive, setWindowSecure, maximizeAlarmVolume', () async {
+  test('calls startLockTask, stopLockTask, isLockTaskActive, setWindowSecure, maximizeAlarmVolume, startAlarm, stopAlarm', () async {
     await service.startLockTask();
     final isActive = await service.isLockTaskActive();
     await service.setWindowSecure(true);
     await service.maximizeAlarmVolume();
+    await service.startAlarm();
+    await service.stopAlarm();
     await service.stopLockTask();
 
     expect(isActive, isTrue);
     expect(
       log.map((e) => e.method).toList(),
-      equals(['startLockTask', 'isLockTaskActive', 'setWindowSecure', 'maximizeAlarmVolume', 'stopLockTask']),
+      equals(['startLockTask', 'isLockTaskActive', 'setWindowSecure', 'maximizeAlarmVolume', 'startAlarm', 'stopAlarm', 'stopLockTask']),
     );
   });
 }

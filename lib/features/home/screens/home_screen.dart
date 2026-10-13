@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:exam/core/theme/app_theme.dart';
+import 'package:exam/core/validators/supervisor_pin_validator.dart';
 import 'package:exam/features/scanner/screens/qr_scanner_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback? onScanRequested;
   final void Function(String url)? onUrlScanned;
+  final String currentSupervisorPin;
+  final void Function(String newPin)? onSupervisorPinChanged;
 
   const HomeScreen({
     super.key,
     this.onScanRequested,
     this.onUrlScanned,
+    this.currentSupervisorPin = SupervisorPinValidator.defaultSupervisorPin,
+    this.onSupervisorPinChanged,
   });
 
   Future<void> _handleScan(BuildContext context) async {
@@ -30,12 +35,89 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  void _showPinConfigDialog(BuildContext context) {
+    final controller = TextEditingController(text: currentSupervisorPin);
+    String? errorText;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.admin_panel_settings_rounded, color: AppTheme.primaryColor),
+                  SizedBox(width: 8),
+                  Text('PIN Pengawas Ujian', style: TextStyle(fontSize: 18)),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PIN ini digunakan pengawas untuk mematikan alarm pelanggaran dan membuka kunci sesi ujian.',
+                    style: TextStyle(fontSize: 13, color: AppTheme.secondaryText),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    decoration: InputDecoration(
+                      labelText: '6 Digit Master PIN',
+                      errorText: errorText,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final newPin = controller.text.trim();
+                    if (SupervisorPinValidator.isValidPinFormat(newPin)) {
+                      onSupervisorPinChanged?.call(newPin);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('PIN Pengawas berhasil diperbarui')),
+                      );
+                    } else {
+                      setDialogState(() {
+                        errorText = 'PIN harus berupa 6 digit angka.';
+                      });
+                    }
+                  },
+                  child: const Text('Simpan PIN'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Exam Shield'),
+        actions: [
+          IconButton(
+            tooltip: 'Pengaturan PIN Pengawas',
+            icon: const Icon(Icons.admin_panel_settings_outlined),
+            onPressed: () => _showPinConfigDialog(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
