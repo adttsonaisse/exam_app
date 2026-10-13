@@ -55,7 +55,7 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.red.shade900.withOpacity(0.95),
+      color: Colors.red.shade900.withValues(alpha: 0.95),
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),

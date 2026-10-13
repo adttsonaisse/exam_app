@@ -1,30 +1,62 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:exam/core/services/kiosk_security_service.dart';
 import 'package:exam/main.dart';
 
+class MockKioskService implements KioskSecurityService {
+  bool isPinned = false;
+  bool isSecure = false;
+  int alarmVolumeCalls = 0;
+
+  @override
+  Future<bool> isLockTaskActive() async => isPinned;
+
+  @override
+  Future<void> startLockTask() async {}
+
+  @override
+  Future<void> stopLockTask() async {
+    isPinned = false;
+  }
+
+  @override
+  Future<void> setWindowSecure(bool enable) async {
+    isSecure = enable;
+  }
+
+  @override
+  Future<void> maximizeAlarmVolume() async {
+    alarmVolumeCalls++;
+  }
+}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('End-to-end flow: Home -> Gatekeeper -> Exam Screen', (tester) async {
+    final mockKiosk = MockKioskService();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpWidget(ExamApp(kioskService: mockKiosk));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 1. Verify Home Screen is visible
+    expect(find.text('Ujian Aman (Exam Shield)'), findsOneWidget);
+    expect(find.text('Scan QR Ujian'), findsOneWidget);
+
+    // 2. Trigger scan callback (simulating QR scan)
+    final homeState = tester.state(find.byType(ExamApp)) as dynamic;
+    homeState.startExamWithUrl('https://forms.gle/abc123xyz');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 3. Verify Gatekeeper Screen is shown (app is not pinned yet)
+    expect(find.textContaining('Sematkan Aplikasi'), findsWidgets);
+
+    // 4. User successfully pins the app and confirms
+    mockKiosk.isPinned = true;
+    homeState.confirmPin();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 5. Verify Exam session bar is visible
+    expect(find.text('Sesi Ujian Terkunci'), findsOneWidget);
+    expect(find.text('Selesai Ujian'), findsOneWidget);
   });
 }

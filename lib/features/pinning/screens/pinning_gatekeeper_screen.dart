@@ -74,7 +74,7 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: AppTheme.dangerColor.withOpacity(0.1),
+                  color: AppTheme.dangerColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
