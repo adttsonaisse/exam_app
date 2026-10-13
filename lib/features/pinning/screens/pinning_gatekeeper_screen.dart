@@ -70,20 +70,13 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
             children: [
               const Spacer(),
 
-              // Superhuman Elevated Security Verification Card
+              // Level 1 Border Containment Card (Matte, no artificial drop shadow)
               Container(
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   color: AppTheme.card,
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   border: Border.all(color: AppTheme.borderColor),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x0A000000),
-                      blurRadius: 16,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -163,7 +156,7 @@ class _PinningGatekeeperScreenState extends State<PinningGatekeeperScreen> {
 
               const Spacer(),
 
-              // Primary Pinning CTA Button
+              // Primary Pinning CTA Button (Flat, purposeful 48px action)
               ElevatedButton(
                 onPressed: _controller.isLoading ? null : _verifyAndPin,
                 style: ElevatedButton.styleFrom(

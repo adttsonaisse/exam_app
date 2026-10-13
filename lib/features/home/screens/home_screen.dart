@@ -46,20 +46,22 @@ class HomeScreen extends StatelessWidget {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppTheme.surfaceColor,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                 side: const BorderSide(color: AppTheme.borderColor),
               ),
               title: const Row(
                 children: [
-                  Icon(Icons.admin_panel_settings_rounded, color: AppTheme.secondaryColor),
+                  Icon(Icons.admin_panel_settings_rounded, color: AppTheme.secondaryColor, size: 22),
                   SizedBox(width: 10),
                   Text(
                     'PIN Pengawas Ujian',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.foregroundColor,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ],
@@ -70,7 +72,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'PIN ini digunakan pengawas untuk mematikan alarm pelanggaran dan membuka kunci sesi ujian.',
-                    style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.secondaryText),
+                    style: TextStyle(fontSize: 13, height: 1.45, color: AppTheme.secondaryText),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -88,7 +90,7 @@ class HomeScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.secondaryColor,
+                    foregroundColor: AppTheme.secondaryText,
                   ),
                   child: const Text('Batal'),
                 ),
@@ -145,59 +147,29 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Superhuman Signature Hero Section
+              // Superhuman Signature Hero Section (Singular gesture, no fluff, no pill eyebrow)
               Container(
-                padding: const EdgeInsets.all(22.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 22.0),
                 decoration: BoxDecoration(
                   gradient: AppTheme.heroGradient,
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 16,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(color: AppTheme.heroWarm),
                 ),
-                child: Column(
+                child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.shield_outlined, size: 14, color: AppTheme.onDark),
-                          SizedBox(width: 6),
-                          Text(
-                            'KIOSK SECURITY ACTIVE',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.onDark,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const Text(
+                    Text(
                       'Ujian Aman (Exam Shield)',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.6,
+                        letterSpacing: -0.5,
                         height: 1.15,
                         color: AppTheme.onDark,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
+                    SizedBox(height: 8),
+                    Text(
                       'Aplikasi pelaksanaan ujian terkunci anti-contek dengan perlindungan layar penuh dan sensor keamanan.',
                       style: TextStyle(
                         fontSize: 13,
@@ -209,7 +181,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // Readiness Checklist Section Header
               const Text(
@@ -222,30 +194,43 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _buildReadinessCard(
-                icon: Icons.camera_alt_outlined,
-                title: 'Kamera Scanner',
-                description: 'Siap memindai QR code Google Form',
-                isReady: true,
-              ),
-              const SizedBox(height: 8),
-              _buildReadinessCard(
-                icon: Icons.wifi,
-                title: 'Koneksi Internet',
-                description: 'Jaringan seluler / Wi-Fi terhubung',
-                isReady: true,
-              ),
-              const SizedBox(height: 8),
-              _buildReadinessCard(
-                icon: Icons.battery_charging_full_rounded,
-                title: 'Status Baterai',
-                description: 'Disarankan daya baterai di atas 20%',
-                isReady: true,
+
+              // Unified Superhuman Readiness List Container (eliminated copy-paste fragmented cards)
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.card,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                  border: Border.all(color: AppTheme.borderColor),
+                ),
+                child: Column(
+                  children: [
+                    _buildReadinessRow(
+                      icon: Icons.camera_alt_outlined,
+                      title: 'Kamera Scanner',
+                      description: 'Siap memindai QR code Google Form',
+                      isReady: true,
+                    ),
+                    const Divider(height: 1, thickness: 1, color: AppTheme.hairline, indent: 58),
+                    _buildReadinessRow(
+                      icon: Icons.wifi_rounded,
+                      title: 'Koneksi Internet',
+                      description: 'Jaringan seluler / Wi-Fi terhubung',
+                      isReady: true,
+                    ),
+                    const Divider(height: 1, thickness: 1, color: AppTheme.hairline, indent: 58),
+                    _buildReadinessRow(
+                      icon: Icons.battery_charging_full_rounded,
+                      title: 'Status Baterai',
+                      description: 'Disarankan daya baterai di atas 20%',
+                      isReady: true,
+                    ),
+                  ],
+                ),
               ),
 
               const Spacer(),
 
-              // Primary CTA Button (Lavender Glow with Ink text, 8px radius)
+              // Primary CTA Button (Lavender Glow with Charcoal text, flat, 8px radius)
               ElevatedButton.icon(
                 onPressed: () => _handleScan(context),
                 icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
@@ -271,19 +256,14 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReadinessCard({
+  Widget _buildReadinessRow({
     required IconData icon,
     required String title,
     required String description,
     required bool isReady,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderColor),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
           Container(
@@ -320,7 +300,7 @@ class HomeScreen extends StatelessWidget {
           ),
           Icon(
             isReady ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-            size: 20,
+            size: 18,
             color: isReady ? AppTheme.badgeSuccess : AppTheme.dangerColor,
           ),
         ],

@@ -55,27 +55,29 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppTheme.surfaceColor,
+          elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusLg),
             side: const BorderSide(color: AppTheme.borderColor),
           ),
           title: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppTheme.badgeWarning),
+              Icon(Icons.warning_amber_rounded, color: AppTheme.badgeWarning, size: 22),
               SizedBox(width: 10),
               Text(
                 'QR Code Tidak Valid',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.foregroundColor,
+                  letterSpacing: -0.3,
                 ),
               ),
             ],
           ),
           content: Text(
             'QR code yang dipindai bukan tautan resmi Google Forms ujian.\n\nIsi QR: $rawValue',
-            style: const TextStyle(fontSize: 14, height: 1.4, color: AppTheme.secondaryText),
+            style: const TextStyle(fontSize: 14, height: 1.45, color: AppTheme.secondaryText),
           ),
           actions: [
             ElevatedButton(
@@ -138,7 +140,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             controller: _scannerController,
             onDetect: _onDetect,
           ),
-          // Superhuman Target Frame (Lavender glow accent, 16px radius)
+          // Matte Target Frame (Precise, purposeful 2px border, 16px radius, no neon glow)
           Center(
             child: Container(
               width: 260,
@@ -146,17 +148,10 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
               decoration: BoxDecoration(
                 border: Border.all(color: AppTheme.primaryColor, width: 2),
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33CBB7FB),
-                    blurRadius: 20,
-                    spreadRadius: 1,
-                  ),
-                ],
               ),
             ),
           ),
-          // Guidance banner (dark surface chip, warm on-dark text)
+          // Guidance banner (Matte dark chip, warm on-dark text)
           Positioned(
             bottom: 48,
             left: 24,
@@ -174,7 +169,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                 style: TextStyle(
                   color: AppTheme.onDark,
                   fontSize: 13,
-                  height: 1.4,
+                  height: 1.45,
                   fontWeight: FontWeight.w500,
                 ),
               ),

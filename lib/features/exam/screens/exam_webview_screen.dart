@@ -134,6 +134,7 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppTheme.surfaceColor,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                 side: const BorderSide(color: AppTheme.borderColor),
@@ -270,16 +271,6 @@ class _ExamWebViewScreenState extends State<ExamWebViewScreen> with WidgetsBindi
                             fontWeight: FontWeight.w600,
                             letterSpacing: -0.2,
                             color: AppTheme.foregroundColor,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Real state live dot indicator (affirmative state without glowing pulse)
-                        Container(
-                          width: 7,
-                          height: 7,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.badgeSuccess,
-                            shape: BoxShape.circle,
                           ),
                         ),
                         const Spacer(),

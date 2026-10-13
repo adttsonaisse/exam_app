@@ -92,13 +92,6 @@ class _AlarmOverlayDialogState extends State<AlarmOverlayDialog>
                 color: AppTheme.card,
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                 border: Border.all(color: AppTheme.borderColor),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x2E000000),
-                    blurRadius: 28,
-                    offset: Offset(0, 10),
-                  ),
-                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
